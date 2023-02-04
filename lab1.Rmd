@@ -32,6 +32,7 @@ mean_kidincome <- mean(nlsy97$kid_income, na.rm = TRUE)
 mean_kidincome
 
 ```
+The sample mean of `kid_income` is $70499.94. 
 
 ```{r q3}
 
@@ -40,13 +41,57 @@ nlsy97 <- nlsy97 |>
 
 mean(nlsy97$below_mean)
 
+```
+
+The sample mean of `below_mean` is .596, suggesing that just under 60% of the observations have a value of `kid_income` below its mean. This is because the dataset is skewed with a number of outlier values for `kid_income`, as seen in the histogram with the high number of right-side values of over $300,000. 
+
+```{r q4}
+
+median_kidincome <- median(nlsy97$kid_income, na.rm = TRUE)
+median_kidincome
+
+```
+The sample median of `kid_income` is $58750. 
+
+```{r q5}
+
+sd_kidincome <- sd(nlsy97$kid_income, na.rm = TRUE)
+sd_kidincome
 
 
 
 ```
 
-The sample mean of `below_mean` is .596, suggesing that just under 60% of the observations have a value of `kid_income` below its mean. This is because the dataset is skewed with a number of outlier values for `kid_income`, as seen in the histogram with the high number of right-side values of over $300,000. 
+The sample standard deviation of `kid_income` is $59552.02. 
 
+```{r q6}
+
+upper_bound1sd <- mean_kidincome + sd_kidincome
+upper_bound1sd
+
+lower_bound1sd <- mean_kidincome - sd_kidincome
+lower_bound1sd
+
+upper_bound2sd <- mean_kidincome + (sd_kidincome * 2)
+upper_bound2sd
+
+lower_bound2sd <- mean_kidincome - (sd_kidincome * 2)
+lower_bound2sd
+
+nlsy97 <- nlsy97 |> 
+          mutate(within1sd = ifelse(kid_income <= upper_bound1sd & kid_income >= lower_bound1sd, 1, 0),
+                 within2sd = ifelse(kid_income <= upper_bound2sd & kid_income >= lower_bound2sd, 1, 0))
+nlsy97
+
+mean(nlsy97$within1sd)
+mean(nlsy97$within2sd)
+
+
+
+
+```
+
+Roughly 79% of observations are within one SD of the mean of `kid_income` and almost 95% of observations are within two SDs of the mean of `kid_income`. This sample is not quite normally distributed. 
 
 
 
