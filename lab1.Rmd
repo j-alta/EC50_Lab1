@@ -1,0 +1,68 @@
+---
+title: "EC50_Lab1"
+output: html_document
+date: "2023-02-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Documents/R/EC50/Lab1")
+library(tidyverse)
+library(haven)
+library(ggthemes)
+library(statar) 
+library(tidyquant)
+nlsy97 <- read_dta("nlsy97.dta")
+view(nlsy97)
+```
+
+```{r q1}
+income_histogram <- nlsy97 |> 
+                    ggplot() +
+                    geom_histogram(aes(kid_income)) +
+                    labs(x = "Child income, averaged between 2013 and 2015") +
+                    scale_x_continuous(labels = scales::dollar_format())
+income_histogram
+  
+```
+
+```{r q2}
+
+mean_kidincome <- mean(nlsy97$kid_income, na.rm = TRUE)
+mean_kidincome
+
+```
+
+```{r q3}
+
+nlsy97 <- nlsy97 |> 
+  mutate(below_mean = if_else(nlsy97$kid_income < mean_kidincome, 1, 0))
+
+mean(nlsy97$below_mean)
+
+
+
+
+```
+
+The sample mean of `below_mean` is .596, suggesing that just under 60% of the observations have a value of `kid_income` below its mean. This is because the dataset is skewed with a number of outlier values for `kid_income`, as seen in the histogram with the high number of right-side values of over $300,000. 
+
+
+
+
+
+
+
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
