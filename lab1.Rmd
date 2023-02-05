@@ -5,6 +5,7 @@ date: "2023-02-04"
 ---
 
 ```{r setup, include=FALSE}
+#Installing required packages and reading in the data 
 knitr::opts_chunk$set(echo = TRUE)
 setwd("~/Documents/R/EC50/Lab1")
 library(tidyverse)
@@ -17,6 +18,7 @@ view(nlsy97)
 ```
 
 ```{r q1}
+#Creating histogram of kid_income
 income_histogram <- nlsy97 |> 
                     ggplot() +
                     geom_histogram(aes(kid_income)) +
@@ -27,7 +29,7 @@ income_histogram
 ```
 
 ```{r q2}
-
+#Calculating mean of kid_income 
 mean_kidincome <- mean(nlsy97$kid_income, na.rm = TRUE)
 mean_kidincome
 
@@ -36,6 +38,7 @@ The sample mean of `kid_income` is $70499.94.
 
 ```{r q3}
 
+#Creating indicator variable for values of kid_income below the mean and calculating the proportion of observations below the mean of kid_income 
 nlsy97 <- nlsy97 |> 
   mutate(below_mean = if_else(nlsy97$kid_income < mean_kidincome, 1, 0))
 
@@ -46,7 +49,7 @@ mean(nlsy97$below_mean)
 The sample mean of `below_mean` is .596, suggesing that just under 60% of the observations have a value of `kid_income` below its mean. This is because the dataset is skewed with a number of outlier values for `kid_income`, as seen in the histogram with the high number of right-side values of over $300,000. 
 
 ```{r q4}
-
+#Calculating the median of kid_income
 median_kidincome <- median(nlsy97$kid_income, na.rm = TRUE)
 median_kidincome
 
@@ -54,18 +57,16 @@ median_kidincome
 The sample median of `kid_income` is $58750. 
 
 ```{r q5}
-
+#Calculating the standard deviation of kid_income
 sd_kidincome <- sd(nlsy97$kid_income, na.rm = TRUE)
 sd_kidincome
-
-
 
 ```
 
 The sample standard deviation of `kid_income` is $59552.02. 
 
 ```{r q6}
-
+#Creating indicator variables for values of kid_income within 1 and 2 SDs of the mean and calculating the proportion of observations that fall within 1 and 2 SDs of the mean of kid_income 
 upper_bound1sd <- mean_kidincome + sd_kidincome
 upper_bound1sd
 
@@ -93,21 +94,103 @@ mean(nlsy97$within2sd)
 
 Roughly 79% of observations are within one SD of the mean of `kid_income` and almost 95% of observations are within two SDs of the mean of `kid_income`. This sample is not quite normally distributed. 
 
+```{r q7}
+#Creating ranked percentiles for all observations of kid_income 
+nlsy97 <- nlsy97 |> 
+          mutate(ranked_kidincome = rank(kid_income))
+
+max_rank <- max(nlsy97$ranked_kidincome)
+
+nlsy97$kid_inc_rank <-  (nlsy97$ranked_kidincome/max_rank)*100
+
+percentile_rank <- function(variable){
+  r <- ifelse(is.na(variable), NA, rank(variable, ties.method = "average"))
+  100*r/max(r, na.rm = TRUE)
+}
+
+nlsy97$kid_inc_rank <- with(nlsy97, percentile_rank(kid_income))
+view(nlsy97)
+
+#Displaying the top 10 and bottom 10 observations ranked by kid_inc_rank
+toprank <- nlsy97 |> 
+  arrange(desc(kid_inc_rank)) |> 
+  slice(1:10)
+
+bottomrank <- nlsy97 |> 
+  arrange(kid_inc_rank) |> 
+  slice(1:10)
 
 
-
-
-
-
-
-
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r q8}
+#Creating a histogram of kid_inc_rank, showcasing an approximately uniform distribution
+rank_histo <- nlsy97 |> 
+  ggplot() +
+  geom_histogram(aes(x = kid_inc_rank, y = after_stat(density))) +
+  labs(title = "Ranked child income",
+       subtitle = "Averaged across 2013 and 2015",
+       x = "Rank")
+
+rank_histo
+
+#Calculating the mean and median of kid_inc_rank
+mean(nlsy97$kid_inc_rank)
+median(nlsy97$kid_inc_rank)
+
+
+```
+
+As shown above, the sample mean and median for `kid_inc_rank` are approximately equal, 50.08 and 50.11. 
+
+```{r q9}
+
+#examining the relationship between kid income and parents' income
+
+linearscatter <- nlsy97 |> 
+  ggplot(aes(x = parent_inc, y = kid_income)) +
+  stat_binmean(n = 20, geom = "point") 
+linearscatter 
+
+ggsave("linearscatter.png")
+
+#examining the relationship between kid income and years of education 
+
+nonlinearscatter <- nlsy97 |> 
+  ggplot(aes(x = child_education, y = kid_income)) +
+  stat_binmean(n = 20, geom = "point") 
+nonlinearscatter 
+ggsave("nonlinearscatter.png")
+
+```
+
+```{r q10}
+#ensuring reproducibility
+set.seed(21519588)
+
+#creating treatment and control groups
+nlsy97 <- nlsy97 |> 
+  mutate(random_number = runif(length(parent_inc)),
+         treatment_group = ifelse(random_number >= 0.5, 1, 0))
+
+#Report total number of observations in treatment group
+sum(nlsy97$treatment_group)
+#Report total number of observations in control group
+sum(1-nlsy97$treatment_group)
+
+#Reporting summary statistics for all variables by treatment group
+options(dplyr.width = Inf)
+nlsy97 |> 
+  group_by(treatment_group) |> 
+  summarise_all("mean")
+nlsy97 |> 
+  group_by(treatment_group) |> 
+  summarise_all("sd")
+
+
+
+
+
+```
+
+Random assignment reduces the risk of bias influencing the results of any experiment. Subconscious or conscious bias when allocating groups through human judgment could lead to groups that are not approximately equal, which can lead to confounding factors that contributes to the fundamental problem of causal inference. Bias could lead to less than verifiable or reproducible results that claim to show a causal link or effect between two or more variables. Reducing bias strengthens the internal validity of any experiment's results and makes for a more robust experiment. 
