@@ -1,6 +1,8 @@
 ---
 title: "EC50_Lab1"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: "2023-02-04"
 ---
 
@@ -28,6 +30,7 @@ income_histogram
   
 ```
 
+
 ```{r q2}
 #Calculating mean of kid_income 
 mean_kidincome <- mean(nlsy97$kid_income, na.rm = TRUE)
@@ -54,6 +57,8 @@ median_kidincome <- median(nlsy97$kid_income, na.rm = TRUE)
 median_kidincome
 
 ```
+
+
 The sample median of `kid_income` is $58750. 
 
 ```{r q5}
@@ -86,9 +91,6 @@ nlsy97
 
 mean(nlsy97$within1sd)
 mean(nlsy97$within2sd)
-
-
-
 
 ```
 
@@ -123,6 +125,7 @@ bottomrank <- nlsy97 |>
 
 ```
 
+
 ```{r q8}
 #Creating a histogram of kid_inc_rank, showcasing an approximately uniform distribution
 rank_histo <- nlsy97 |> 
@@ -140,6 +143,7 @@ median(nlsy97$kid_inc_rank)
 
 
 ```
+
 
 As shown above, the sample mean and median for `kid_inc_rank` are approximately equal, 50.08 and 50.11. 
 
@@ -187,10 +191,36 @@ nlsy97 |>
   group_by(treatment_group) |> 
   summarise_all("sd")
 
-
-
-
-
 ```
 
+
 Random assignment reduces the risk of bias influencing the results of any experiment. Subconscious or conscious bias when allocating groups through human judgment could lead to groups that are not approximately equal, which can lead to confounding factors that contributes to the fundamental problem of causal inference. Bias could lead to less than verifiable or reproducible results that claim to show a causal link or effect between two or more variables. Reducing bias strengthens the internal validity of any experiment's results and makes for a more robust experiment. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
